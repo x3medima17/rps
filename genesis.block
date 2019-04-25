@@ -1,0 +1,202 @@
+{
+  "block_v1": {
+    "payload": {
+      "transactions": [
+        {
+          "payload": {
+            "reducedPayload": {
+              "commands": [
+                {
+                  "addPeer": {
+                    "peer": {
+                      "address": "127.0.0.1:10001",
+                      "peerKey": "bddd58404d1315e0eb27902c5d7c8eb0602c16238f005773df406bc191308929"
+                    }
+                  }
+                },
+                {
+                  "createRole": {
+                    "roleName": "admin",
+                    "permissions": [
+                      "can_add_asset_qty",
+                      "can_receive",
+                      "can_transfer",
+                      "can_get_all_acc_ast",
+                      "can_get_all_acc_txs",
+                      "can_create_asset",
+                      "can_subtract_asset_qty"
+                    ]
+                  }
+                },
+                {
+                  "createRole": {
+                    "roleName": "player",
+                    "permissions": [
+                      "can_receive",
+                      "can_transfer"
+                    ]
+                  }
+                },
+                {
+                  "createRole": {
+                    "roleName": "game",
+                    "permissions": [
+                      "can_receive"
+                    ]
+                  }
+                },
+                {
+                  "createDomain": {
+                    "domainId": "game",
+                    "defaultRole": "player"
+                  }
+                },
+                {
+                  "createAsset": {
+                    "assetName": "rock",
+                    "domainId": "game",
+                    "precision": 0
+                  }
+                },
+                {
+                  "createAsset": {
+                    "assetName": "paper",
+                    "domainId": "game",
+                    "precision": 0
+                  }
+                },
+                {
+                  "createAsset": {
+                    "assetName": "scissors",
+                    "domainId": "game",
+                    "precision": 0
+                  }
+                },
+                {
+                  "createAccount": {
+                    "accountName": "admin",
+                    "domainId": "game",
+                    "publicKey": "313a07e6384776ed95447710d15e59148473ccfc052a681317a72a69f2a49910"
+                  }
+                },
+                {
+                  "createAccount": {
+                    "accountName": "bob",
+                    "domainId": "game",
+                    "publicKey": "150242632660e8889ed7bb291bd7eaf48871b3e6b13a39ee95601cc0a2646a90"
+                  }
+                },
+                {
+                  "createAccount": {
+                    "accountName": "alice",
+                    "domainId": "game",
+                    "publicKey": "de909d5abd40c57106e8a113a0ae6b680564c312730026db73843a4c34db105a"
+                  }
+                },
+                {
+                  "createAccount": {
+                    "accountName": "game",
+                    "domainId": "game",
+                    "publicKey": "0000000000000000000000000000000000000000000000000000000000000000"
+                  }
+                },
+                {
+                  "appendRole": {
+                    "accountId": "admin@game",
+                    "roleName": "admin"
+                  }
+                }
+              ],
+              "quorum": 1
+            }
+          }
+        },
+        {
+          "payload": {
+            "reducedPayload": {
+              "commands": [
+                {
+                  "addAssetQuantity": {
+                    "assetId": "rock#game",
+                    "amount": "2"
+                  }
+                },
+                {
+                  "addAssetQuantity": {
+                    "assetId": "paper#game",
+                    "amount": "2"
+                  }
+                },
+                {
+                  "addAssetQuantity": {
+                    "assetId": "scissors#game",
+                    "amount": "2"
+                  }
+                },
+                {
+                  "transferAsset": {
+                    "srcAccountId": "admin@game",
+                    "destAccountId": "bob@game",
+                    "assetId": "rock#game",
+                    "description": "",
+                    "amount": "1"
+                  }
+                },
+                {
+                  "transferAsset": {
+                    "srcAccountId": "admin@game",
+                    "destAccountId": "bob@game",
+                    "assetId": "paper#game",
+                    "description": "",
+                    "amount": "1"
+                  }
+                },
+                {
+                  "transferAsset": {
+                    "srcAccountId": "admin@game",
+                    "destAccountId": "bob@game",
+                    "assetId": "scissors#game",
+                    "description": "",
+                    "amount": "1"
+                  }
+                },
+                {
+                  "transferAsset": {
+                    "srcAccountId": "admin@game",
+                    "destAccountId": "alice@game",
+                    "assetId": "rock#game",
+                    "description": "",
+                    "amount": "1"
+                  }
+                },
+                {
+                  "transferAsset": {
+                    "srcAccountId": "admin@game",
+                    "destAccountId": "alice@game",
+                    "assetId": "paper#game",
+                    "description": "",
+                    "amount": "1"
+                  }
+                },
+                {
+                  "transferAsset": {
+                    "srcAccountId": "admin@game",
+                    "destAccountId": "alice@game",
+                    "assetId": "scissors#game",
+                    "description": "",
+                    "amount": "1"
+                  }
+                }
+              ],
+              "quorum": 1,
+              "creatorAccountId": "admin@game"
+            }
+          }
+        }
+      ],
+      "txNumber": 2,
+      "height": "1",
+      "prevBlockHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}
