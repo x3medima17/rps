@@ -15,6 +15,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
     compile 'com.github.hyperledger.iroha-java:client:4.0.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1'
+
 
 }
 

@@ -3,8 +3,16 @@ package rps
 import iroha.protocol.Endpoint
 import iroha.protocol.TransactionOuterClass
 import jp.co.soramitsu.iroha.java.*
-import java.time.*
+import kotlinx.coroutines.*
+import java.lang.Math.random
+import java.lang.Math.round
+import java.lang.Thread.sleep
+import java.time.Instant
+import java.util.*
+import kotlin.concurrent.fixedRateTimer
+import kotlin.system.measureTimeMillis
 
+const val USERS = 1
 
 val adminKeypair = Utils.parseHexKeypair(
     "313a07e6384776ed95447710d15e59148473ccfc052a681317a72a69f2a49910",
@@ -23,14 +31,14 @@ val bobKeypair = Utils.parseHexKeypair(
 )
 
 
-
-val adminId = "admin@game"
+val adminId = "admin@test"
 val aliceId = "alice@game"
 val bobId = "bob@game"
 val gameId = "game@game"
 
 val irohaAPI = IrohaAPI("localhost", 50051)
 
+val lst: LinkedList<Long> = LinkedList()
 
 fun getStatus(tx: TransactionOuterClass.Transaction): Endpoint.ToriiResponse = irohaAPI.txStatusSync(Utils.hash(tx))
 
@@ -38,71 +46,92 @@ fun sendAndWait(tx: TransactionOuterClass.Transaction): Endpoint.ToriiResponse {
     irohaAPI.transactionSync(tx)
     while (getStatus(tx).txStatus != Endpoint.TxStatus.COMMITTED
         && getStatus(tx).txStatus != Endpoint.TxStatus.REJECTED
-    ) ;{
+    ) {
         println(getStatus(tx))
     }
     return getStatus(tx)
 }
 
 
-
-fun getChoice(userId : String) : String {
-    return  irohaAPI
-        .query(
-            Query.builder(adminId, 1)
-                .getAccountTransactions(userId, 1, null)
-                .buildSigned(adminKeypair)
-        )
-        .transactionsPageResponse
-        .transactionsList
-        .first()
-        .payload
-        .reducedPayload
-        .commandsList
-        .first()
-        .transferAsset
-        .assetId
-        .split("#")
-        .first()
-}
-
-fun getResult(bobChoice : String, aliceChoice: String): String {
-    val map = mapOf(
-        0 to "tie",
-        1 to "bob",
-        2 to "alice",
-        -1 to "error"
-    )
-    val res =  when (bobChoice) {
-        "rock" -> when(aliceChoice) {
-            "rock" -> 0
-            "paper" -> 2
-            "scissors" -> 1
-            else -> -1
-        }
-        "paper" -> when(aliceChoice) {
-            "rock" -> 1
-            "paper" -> 0
-            "scissors" -> 2
-            else -> -1
-        }
-        "scissors" -> when(aliceChoice) {
-            "rock" -> 2
-            "paper" -> 1
-            "scissors" -> 0
-            else -> -1
-        }
-        else -> -1
+fun ring() {
+    val time = System.currentTimeMillis()
+    try {
+        while (time - lst.peek() > 10000)
+            lst.remove()
+    } catch (ex: Exception) {
     }
-    return map[res]!!
 }
 
-fun main(){
+var txs = 0
 
-    val bobChoice = getChoice(bobId)
-    val aliceChoice = getChoice(aliceId)
+fun listen() {
+    val query = BlocksQueryBuilder(adminId, Instant.now(), 1)
+        .buildSigned(adminKeypair)
 
-    println(getResult(bobChoice, aliceChoice))
+    irohaAPI.blocksQuery(query).blockingSubscribe { block ->
+        //        println(block)
+        val time = System.currentTimeMillis()
+        val bl = block
+            .blockResponse
+            .block
+            .blockV1
+            .payload
+        val committed_hashes = bl
+            .transactionsList
+            .map {
+                jp.co.soramitsu.iroha.java.Utils.hash(it)
+            }
+        val rejected_hashes = bl.rejectedTransactionsHashesList
+
+        val hashes = committed_hashes + rejected_hashes
+        txs += hashes.size
+        repeat(hashes.size) {
+            lst.add(time)
+        }
+        //println(time)
+
+
+    }
+
+}
+
+fun main() {
+
+    val am = "%.4f".format(random())
+    val tx = Transaction.builder(adminId)
+        .transferAsset(adminId, "test@test", "coin#test", "", am)
+        .sign(adminKeypair)
+        .build()
+    sendAndWait(tx)
+    return
+//    repeat(USERS) {
+//        println("Repeat")
+//        GlobalScope.launch(Dispatchers.IO) {
+//            while (true) {
+//                val am = "%.4f".format(random())
+//                val tx = Transaction.builder(adminId)
+//                    .transferAsset(adminId, "test@test", "coin#test", "", am)
+//                    .sign(adminKeypair)
+//                    .build()
+//                irohaAPI.transactionSync(tx)
+//                sendAndWait(tx)
+//                sleep(10000 / 1000)
+//
+//            }
+//        }
+//
+//    }
+
+    GlobalScope.launch {
+        listen()
+    }
+    fixedRateTimer("", false, 0L, 500) {
+        println(txs)
+        println(lst.size / 10)
+        ring()
+
+    }
+
 
 }
 
